@@ -68,13 +68,15 @@ class Environment:
         self.resources = resources
         self.board = json.loads(board)
 
-        # uncomment next line to use numpy array instead of array of array of array
+        # uncomment next lines to use numpy array instead of array of array of array (3D array)
+        # IT IS RECOMMENDED for simplicity
+        # arrays to numpy converstion:  self.board[y][x][idx] => self.board[x,y,idx] 
+        #
         #self.board = np.swapaxes(np.array(json.loads(board)),0,1)
         #debug(self.board.shape)
-        # arrays to numpy converstion:  self.board[y][x][idx] => self.board[x,y,idx] 
         
 
-    def play(self): # artificial inteligence
+    def play(self): # agent move, call playActions only ONCE
 
         actions = []
         print("Current production per turn is:", self.production)
@@ -86,9 +88,22 @@ class Environment:
             self.resources -= self.upgrade_cost
 
         # only buy ranged
-        #if self.resources>=SOLDIER_RANGED_COST and self.board[VCENTER][1][0] not in enemy_s:
-        #    actions.append(recruitSoldiers(ALLIED_SOLDIER_RANGED, self.resources//SOLDIER_RANGED_COST))
-        
+        #default_cell_s_type = self.board[VCENTER][1][0]   # in numpy would be self.board[1,VCENTER,0]
+        #if self.resources>=SOLDIER_RANGED_COST and default_cell_s_type in [EMPTY_CELL, ALLIED_SOLDIER_RANGED]:
+        #    buyamount = self.resources//SOLDIER_RANGED_COST
+        #    actions.append( recruitSoldiers(ALLIED_SOLDIER_RANGED, self.resources//SOLDIER_RANGED_COST) )
+        #    self.resources -= buyamount*SOLDIER_RANGED_COST
+
+
+
+        # example how to move troops from (4,0) to (4,1), step by step
+        #origincell = self.board[0][4]   #in case of numpy array would be self.board[4,0]
+        #targetcell = self.board[1][4]   #in case of numpy array would be self.board[4,1]
+        #soldier_type, soldier_amount = targetcell
+        #if soldier_type in [EMPTY_CELL, origincell[0]]:  # if target cell is empty or if contains same type troops 
+        #    moveaction = moveSoldiers((4,0),(4,1),soldier_amount)
+        #    actions.append(  moveaction )
+
         playActions(actions)
         
 
@@ -110,6 +125,7 @@ def main():
         env.play()
         
 
-
 if __name__ == "__main__":
     main()
+
+
