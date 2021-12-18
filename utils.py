@@ -39,7 +39,6 @@ VCENTER = HEIGHT//2
 WIDTH = 30
 
 
-
 def gridstr(cell):
     cell = str(cell)
     for f,t in zip("1234", "BMRZ"):
