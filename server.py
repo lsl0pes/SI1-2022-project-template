@@ -29,6 +29,9 @@ except NameError:
   pass
 
 
+MAX_RETARD = 20000
+
+
 DEBUG_FILE = "server_debug.txt"
 
 def debug(*args):
@@ -94,7 +97,7 @@ class Environment:
             self.board[i][5] = [ALLIED_SOLDIER_MELEE, 10]
 
     def end(self):
-        return self.board[HEIGHT//2][0][0] != ALLIED_MAIN_BUILDING
+        return self.board[HEIGHT//2][0][0] != ALLIED_MAIN_BUILDING or self.turn>=MAX_T or self.retard>=MAX_RETARD
 
     def validatePurchases(self, actions):
         leftactions = []
@@ -295,7 +298,7 @@ class Environment:
         for row in range(HEIGHT):
             cell = self.board[row][WIDTH-1]
             if cell[0] in alied_s:
-                self.retard += cell[1]/5.0
+                self.retard =  min(MAX_RETARD, self.retard+cell[1]/5.0)
                 self.resources += cell[1]*SOLDIERS_COST[cell[0]]*2
                 self.board[row][WIDTH-1] = [None, 0] 
         
@@ -382,7 +385,10 @@ class Environment:
     def enemySpawn(self):
   
         spawnsoldiers = 2 + int( ( max(self.turn - self.retard, self.turn/3) **2)/65)
-        cell = random.randint(0,HEIGHT-1)
+        if self.difficulty==0:
+            cell = random.randint(0,HEIGHT-1)
+        else:
+            cell = self.turn%HEIGHT
         self.board[cell][WIDTH-1] = [ENEMY_SOLDIER_MELEE, spawnsoldiers]
 
         debug("State after enemy actions:")
@@ -491,7 +497,7 @@ def main():
     while 1:
         env.outputState()
         error = env.readAndApplyTurnEvents()
-        debug("SCORE: ", env.turn, ", retard: ", env.retard)
+        debug("SCORE: ", env.turn if env.retard<MAX_RETARD else int(MAX_T*1.5-env.turn/2), ", retard: ", env.retard)
         if env.end():
             debug("END!")
             Output("END")

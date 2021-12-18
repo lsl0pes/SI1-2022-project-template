@@ -23,7 +23,7 @@ SOLDIER_RANGED_COST = SOLDIERS_COST[ALLIED_SOLDIER_RANGED]
 # constants
 MAX_ACTIONS = 500
 MAX_PROCESS_TIME = 200 # milliseconds
-
+MAX_T = 2000 # maximun turns
 
 # depends on the difficulty
 BASE_COST = (500, 800)
@@ -37,6 +37,7 @@ enemy_s = [ENEMY_SOLDIER_MELEE, ENEMY_SOLDIER_RANGED]
 HEIGHT = 11
 VCENTER = HEIGHT//2 
 WIDTH = 30
+
 
 
 def gridstr(cell):

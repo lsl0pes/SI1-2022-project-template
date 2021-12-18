@@ -1,4 +1,3 @@
-from game_objects import *
 from utils import *
 import sys
 import time
@@ -8,10 +7,16 @@ CELL_INCREASE = 65
 FPS = 5
 TIME_BETWEEN_DRAWS = 1/FPS
 
+try:
+    import pygame
+    from game_objects import *
+except:
+    print(f"Error importing pygame modules: {sys.exc_info()[1]}", file=sys.stderr, flush=True)
+
 class Viewer:
     def __init__(self):
         self.history = []
-        import pygame
+        
         pygame.init()
         pygame.font.init()
         self.screen = pygame.display.set_mode([WIDTH*CELL_PIXELS + 10, HEIGHT*CELL_PIXELS + 5 + CELL_INCREASE])
