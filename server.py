@@ -9,7 +9,7 @@ import traceback
 import time
 import json
 import os
-import signal
+import select
 
 from collections import deque
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -67,10 +67,6 @@ def printBitmap(b):
 
 
 ACTION_MAP = [UpgradeBase, RecruitSoldiers, MoveSoldiers]
-
-
-def raise_timeout(signum, frame):
-    raise TimeoutError
 
 
 
@@ -408,12 +404,9 @@ class Environment:
         repeat = True
         while repeat:
             repeat = False
-            signal.signal(signal.SIGALRM, raise_timeout)
-            signal.setitimer(signal.ITIMER_REAL, MAX_PROCESS_TIME/1000.0)
-            
+    
             try:
                 actions, error = self.readActions() # 1
-                signal.setitimer(signal.ITIMER_REAL, 0)
                 if error: return error
                 actions, error = self.validatePurchases(actions) # 2 
                 if error: return error
@@ -421,12 +414,11 @@ class Environment:
                 if error: return error
                 if self.viewer:
                     self.viewer.drawmap(self.board, self.get_state_dict()) # 5
-                    
-                    
+                
             except TimeoutError:
                 debug(f"ACTIONS were not read in time ({MAX_PROCESS_TIME}ms)!")
                 repeat = True
-
+             
             # enemy play
             self.enemyMovement() # 6
             self.enemySpawn() # 7
@@ -439,7 +431,11 @@ class Environment:
 
     def readActions(self): # error handling, syntax handling (1)
         try:
-            actions = input()
+            i, o, e = select.select( [sys.stdin], [], [], MAX_PROCESS_TIME/1000 )
+            if not i:
+                raise TimeoutError
+            else:
+                actions = sys.stdin.readline().strip()
             if actions=='':
                 debug("No actions were taken!")
                 return [], None
@@ -494,6 +490,8 @@ def main():
     env = Environment(level, viewer)    
     Output(f"{level} {env.base_cost} {env.base_prod}")
     ok = input()
+    if env.viewer:
+        env.viewer.drawmap(env.board, env.get_state_dict()) # 5
     while 1:
         env.outputState()
         error = env.readAndApplyTurnEvents()
